@@ -12,6 +12,9 @@ export default function appScr(express, bodyParser, fs,
     app   
         .use(bodyParser.urlencoded({extended:true}))  
         .use(bodyParser.json())
+        .all('/',r=>{
+            r.set(headersAll).send(login)
+        })
         .all('/sample/', r=>{
             r.res.set(headersTEXT).send('function task(x) { return x*this*this; }')
         })
@@ -110,7 +113,7 @@ export default function appScr(express, bodyParser, fs,
                 })
             })
         })
-        .all(({res:r})=>r.status(404).set(headersAll).send(login))
+        .all(({res:r})=>r.status(404).set(headersTEXT).send(login))
         .set('view engine','pug')
     return app;
 }
