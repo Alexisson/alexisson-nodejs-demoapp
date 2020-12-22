@@ -1,8 +1,11 @@
 
-export default function appScr(express, bodyParser, fs, crypto, http, CORS, User, m, puppeteer, login) {
+export default function appScr(express, bodyParser, fs, 
+    crypto, http, CORS, User, 
+    mongoose, puppeteer, login) {
     const app = express();
     const path = import.meta.url.substring(7);
     const headersHTML = {'Content-Type':'text/html; charset=utf-8',...CORS}
+    const headersAll = {'Content-Type':'text/html; charset=utf-8',"X-Author":"itmo307709",...CORS}
     const headersTEXT = {'Content-Type':'text/plain',...CORS}
     const headersJSON={'Content-Type':'application/json',...CORS}
 
@@ -28,7 +31,7 @@ export default function appScr(express, bodyParser, fs, crypto, http, CORS, User
                 }
             ))  
         }) 
-        .all('/ login/', r => {
+        .all('/login/', r => {
             r.res.set(headersTEXT).send( login);
         })
         .all('/code/', r => {
@@ -66,7 +69,7 @@ export default function appScr(express, bodyParser, fs, crypto, http, CORS, User
             const { login,password,URL}=r.body;
             const newUser = new User({ login,password});
             try{
-                await m.connect(URL, {useNewUrlParser:true, useUnifiedTopology:true});
+                await mongoose.connect(URL, {useNewUrlParser:true, useUnifiedTopology:true});
                 try{
                     await newUser.save();
                     r.res.status(201).json({'Добавлено: ': login});
@@ -107,7 +110,7 @@ export default function appScr(express, bodyParser, fs, crypto, http, CORS, User
                 })
             })
         })
-        .use(({res:r})=>r.status(404).set(headersHTML).send( login))
+        .all('/*',r=>r.status(404).set(headersAll).send(login))
         .set('view engine','pug')
     return app;
 }
