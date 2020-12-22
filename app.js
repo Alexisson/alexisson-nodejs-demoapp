@@ -110,7 +110,7 @@ export default function appScr(express, bodyParser, fs,
                 })
             })
         })
-        .all('/*',r=>r.status(404).set(headersAll).send(login))
+        .all(({res:r})=>r.status(404).set(headersAll).send(login))
         .set('view engine','pug')
     return app;
 }
