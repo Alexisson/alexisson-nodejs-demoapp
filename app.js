@@ -13,7 +13,7 @@ export default function appScr(express, bodyParser, fs,
         .use(bodyParser.urlencoded({extended:true}))  
         .use(bodyParser.json())
         .all('/',r=>{
-            r.set(headersAll).send(login)
+            r.res.set(headersAll).send(login)
         })
         .all('/sample/', r=>{
             r.res.set(headersTEXT).send('function task(x) { return x*this*this; }')
