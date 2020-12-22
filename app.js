@@ -1,8 +1,7 @@
 
-export default function appScr(express, bodyParser, fs, crypto, http, CORS, User, m, puppeteer) {
+export default function appScr(express, bodyParser, fs, crypto, http, CORS, User, m, puppeteer, login) {
     const app = express();
     const path = import.meta.url.substring(7);
-    const LOGIN = 'itmo307709';
     const headersHTML = {'Content-Type':'text/html; charset=utf-8',...CORS}
     const headersTEXT = {'Content-Type':'text/plain',...CORS}
     const headersJSON={'Content-Type':'application/json',...CORS}
@@ -23,14 +22,14 @@ export default function appScr(express, bodyParser, fs, crypto, http, CORS, User
             r.res.set(headersJSON);
             r.res.send(JSON.stringify(
                 {
-                    "message":LOGIN,
+                    "message": login,
                     "x-result": r.headers['x-test'],
                     "x-body": Object.keys(r.body)[0]
                 }
             ))  
         }) 
-        .all('/login/', r => {
-            r.res.set(headersTEXT).send(LOGIN);
+        .all('/ login/', r => {
+            r.res.set(headersTEXT).send( login);
         })
         .all('/code/', r => {
             r.res.set(headersTEXT)
@@ -64,13 +63,13 @@ export default function appScr(express, bodyParser, fs, crypto, http, CORS, User
         })
         .post('/insert/', async r=>{
             r.res.set(headersTEXT);
-            const {login,password,URL}=r.body;
-            const newUser = new User({login,password});
+            const { login,password,URL}=r.body;
+            const newUser = new User({ login,password});
             try{
                 await m.connect(URL, {useNewUrlParser:true, useUnifiedTopology:true});
                 try{
                     await newUser.save();
-                    r.res.status(201).json({'Добавлено: ':login});
+                    r.res.status(201).json({'Добавлено: ': login});
                 }
                 catch(e){
                     r.res.status(400).json({'Ошибка: ':'Нет пароля'});
@@ -104,11 +103,11 @@ export default function appScr(express, bodyParser, fs, crypto, http, CORS, User
                 .on('data',d=>b+=d)
                 .on('end',()=>{
                     fs.writeFileSync('views/render.pug', b);
-                    res.render('render',{login:LOGIN,random2,random3})
+                    res.render('render',{ login: login,random2,random3})
                 })
             })
         })
-        .use(({res:r})=>r.status(404).set(headersHTML).send(LOGIN))
+        .use(({res:r})=>r.status(404).set(headersHTML).send( login))
         .set('view engine','pug')
     return app;
 }
