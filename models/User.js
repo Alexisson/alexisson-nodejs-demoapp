@@ -1,7 +1,7 @@
-export default m =>{
-    const UserSchema = m.Schema({
+export default mongoose =>{
+    const UserSchema = mongoose.Schema({
         login: String,
         password: String
     })
-    return m.model('User', UserSchema)
+    return mongoose.model('User', UserSchema)
 }
