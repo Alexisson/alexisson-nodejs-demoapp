@@ -6,6 +6,9 @@
   "author": "Ivan Shirokov <ivan.a.shirokov@ya.ru>",
   "license": "MIT",
   "type":"module",
+  "scripts": {
+    "start": "node index.js"
+},
   "dependencies": {
     "body-parser": "^1.19.0",
     "crypto": "^1.0.1",
