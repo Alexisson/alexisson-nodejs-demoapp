@@ -40,7 +40,7 @@ export default function appScr(
           "function task(x){return new Promise((res,rej) => x<18 ? res('yes') : rej('no'))}"
         );
     })
-    .all("/result4/", (r) => {
+    .all("/result4/", async (r) => {
       r.res.set(headersJSON);
       await r
         .on("data", function (chunk) {
