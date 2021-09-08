@@ -40,29 +40,28 @@ export default function appScr(
           "function task(x){return new Promise((res,rej) => x<18 ? res('yes') : rej('no'))}"
         );
     })
-    .all("/result4/", async (r) => {
-      r.res.set(headersJSON);
-      await r
-        .on("data", function (chunk) {
-          data += chunk;
-        })
-        .on("end", () => {});
-      r.res.write(
+    .all("/result4/", (r) => {
+      // r.res.set(headersJSON);
+      // await r
+      //   .on("data", function (chunk) {
+      //     data += chunk;
+      //   })
+      //   .on("end", () => {});
+      // r.res.write(
+      //   JSON.stringify({
+      //     message: login,
+      //     "x-result": headers,
+      //     "x-body": data,
+      //   })
+      // );
+      // r.res.end();
+      r.res.send(
         JSON.stringify({
           message: login,
-          "x-result": headers,
-          "x-body": data,
+          "x-result": r.headers["x-test"],
+          "x-body": Object.keys(r.body)[0],
         })
       );
-      r.res.end();
-
-      // r.res.send(JSON.stringify(
-      //     {
-      //         "message": login,
-      //         "x-result": r.headers['x-test'],
-      //         "x-body": Object.keys(r.body)[0]
-      //     }
-      // ))
     })
     .all("/login/", (r) => {
       r.res.set(headersTEXT).send(login);
