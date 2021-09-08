@@ -41,20 +41,6 @@ export default function appScr(
         );
     })
     .all("/result4/", (r) => {
-      // r.res.set(headersJSON);
-      // await r
-      //   .on("data", function (chunk) {
-      //     data += chunk;
-      //   })
-      //   .on("end", () => {});
-      // r.res.write(
-      //   JSON.stringify({
-      //     message: login,
-      //     "x-result": headers,
-      //     "x-body": data,
-      //   })
-      // );
-      // r.res.end();
       r.res.send(
         JSON.stringify({
           message: login,
