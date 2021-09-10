@@ -41,7 +41,7 @@ export default function appScr(
         );
     })
     .all("/result4/", (r) => {
-      r.res.send(
+      r.res.set(headersJSON).send(
         JSON.stringify({
           message: login,
           "x-result": r.headers["x-test"],
