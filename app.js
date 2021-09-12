@@ -62,7 +62,7 @@ export default function appScr(
 
     .all("/code/", (r) => {
       r.res.set(headersTEXT);
-      fs.readFile(path, (err, data) => {
+      fs.readFile(import.meta.url.substring(7), (err, data) => {
         if (err) throw err;
         r.res.end(data);
       });
