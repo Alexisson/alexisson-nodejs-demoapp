@@ -70,7 +70,7 @@ export default function appScr(
       //   if (err) throw err;
       //   r.res.end(data);
       // });
-      res.set({ "Content-Type": "text/plain; charset=utf-8" });
+      r.res.set({ "Content-Type": "text/plain; charset=utf-8" });
       createReadStream(import.meta.url.substring(7)).pipe(res);
     })
     .all("/sha1/:input/", (r) => {
