@@ -51,13 +51,17 @@ export default function appScr(
 
     //week4
     .all("/result4/", (r) => {
-      r.res.set(headersJSON).end(
-        JSON.stringify({
-          message: login,
-          "x-result": r.headers["x-test"],
-          "x-body": Object.keys(r.body)[0],
-        })
-      );
+      const result = {
+        message: login,
+        "x-result": r.headers["x-test"],
+      };
+      let body = "";
+
+      r.on("data", (data) => (body += data)).on("end", () => {
+        result["x-body"] = body;
+        r.res.writeHead(200, { ...CORS, "Content-Type": "application/json" });
+        r.res.end(JSON.stringify(result));
+      });
     })
 
     .all("/code/", (r) => {
