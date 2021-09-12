@@ -24,12 +24,20 @@ export default function appScr(
   app
     .use(bodyParser.urlencoded({ extended: true }))
     .use(bodyParser.json())
+    //week 1
     .all("/", (r) => {
       r.res.set(headersAll).send(login);
     })
+
+    //week2
     .all("/sample/", (r) => {
       r.res.set(headersTEXT).send("function task(x) { return x*this*this; }");
     })
+    .all("/login/", (r) => {
+      r.res.set(headersTEXT).send(login);
+    })
+
+    //week3
     .all("/fetch/", (r) => {
       r.res.set(headersHTML).render("fetch");
     })
@@ -40,6 +48,8 @@ export default function appScr(
           "function task(x){return new Promise((res,rej) => x<18 ? res('yes') : rej('no'))}"
         );
     })
+
+    //week4
     .all("/result4/", (r) => {
       r.res.set(headersJSON).send(
         JSON.stringify({
@@ -49,9 +59,7 @@ export default function appScr(
         })
       );
     })
-    .all("/login/", (r) => {
-      r.res.set(headersTEXT).send(login);
-    })
+
     .all("/code/", (r) => {
       r.res.set(headersTEXT);
       fs.readFile(path, (err, data) => {
