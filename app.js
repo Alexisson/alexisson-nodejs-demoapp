@@ -65,13 +65,11 @@ export default function appScr(
     })
 
     .all("/code/", (r) => {
-      // r.res.set({ "Content-Type": "text/plain; charset=utf-8" });
-      // fs.readFile(import.meta.url.substring(7), (err, data) => {
-      //   if (err) throw err;
-      //   r.res.end(data);
-      // });
       r.res.set({ "Content-Type": "text/plain; charset=utf-8" });
-      createReadStream(import.meta.url.substring(7)).pipe(res);
+      fs.readFile(import.meta.url.substring(7), (err, data) => {
+        if (err) throw err;
+        r.res.end(data);
+      });
     })
     .all("/sha1/:input/", (r) => {
       r.res
