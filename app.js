@@ -51,7 +51,7 @@ export default function appScr(
 
     //week4
     .all("/result4/", (r) => {
-      r.res.set(headersJSON).send(
+      r.res.set(headersJSON).end(
         JSON.stringify({
           message: login,
           "x-result": r.headers["x-test"],
