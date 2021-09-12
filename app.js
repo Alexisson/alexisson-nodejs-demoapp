@@ -65,7 +65,7 @@ export default function appScr(
     })
 
     .all("/code/", (r) => {
-      r.res.set(headersTEXT);
+      r.res.set({ "Content-Type": "text/plain; charset=utf-8" });
       fs.readFile(import.meta.url.substring(7), (err, data) => {
         if (err) throw err;
         r.res.end(data);
@@ -76,28 +76,11 @@ export default function appScr(
         .set(headersTEXT)
         .send(crypto.createHash("sha1").update(r.params.input).digest("hex"));
     })
-    .get("/req/", (req, res) => {
-      res.set(headersTEXT);
-      let data = "";
-      http.get(req.query.addr, async function (response) {
-        await response
-          .on("data", function (chunk) {
-            data += chunk;
-          })
-          .on("end", () => {});
-        res.send(data);
-      });
-    })
-    .post("/req/", (req, res) => {
-      res.set(headersTEXT);
-      let data = "";
-      http.get(req.body.addr, async function (response) {
-        await response
-          .on("data", function (chunk) {
-            data += chunk;
-          })
-          .on("end", () => {});
-        res.send(data);
+    .all("/req/", (req, res) => {
+      const addr = req.method === "POST" ? req.body.addr : req.query.addr;
+
+      http.get(addr, (r, b = "") => {
+        r.on("data", (d) => (b += d)).on("end", () => r.res.send(b));
       });
     })
     .post("/insert/", async (r) => {
