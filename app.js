@@ -80,15 +80,21 @@ export default function appScr(
           .on("data", function (chunk) {
             data += chunk;
           })
-          .on("end", () => {
-            res.send(data);
-          });
+          .on("end", () => {});
+        res.send(data);
       });
     })
-    .post("/req/", (r) => {
-      r.res.set(headersTEXT);
-      const { addr } = r.body;
-      r.res.send(addr);
+    .post("/req/", (req, res) => {
+      res.set(headersTEXT);
+      let data = "";
+      http.get(req.body.addr, async function (response) {
+        await response
+          .on("data", function (chunk) {
+            data += chunk;
+          })
+          .on("end", () => {});
+        res.send(data);
+      });
     })
     .post("/insert/", async (r) => {
       r.res.set(headersTEXT);
