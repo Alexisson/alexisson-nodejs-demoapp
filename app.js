@@ -20,6 +20,7 @@ export default function appScr(
   };
   const headersTEXT = { "Content-Type": "text/plain", ...CORS };
   const headersJSON = { "Content-Type": "application/json", ...CORS };
+  const headersCORS = {...CORS};
 
   app
     .use(bodyParser.urlencoded({ extended: true }))
@@ -31,9 +32,6 @@ export default function appScr(
     .all("/sample/", (r) => {
       r.res.set(headersTEXT).send("function task(x) { return x*this*this; }");
     })
-    .all("/login/", (r) => {
-      r.res.set(headersTEXT).send(login);
-    })
     .all("/fetch/", (r) => {
       r.res.set(headersHTML).render("fetch");
     })
@@ -44,8 +42,6 @@ export default function appScr(
           "function task(x){return new Promise((res,rej) => x<18 ? res('yes') : rej('no'))}"
         );
     })
-
-
     .all("/result4/", (r) => {
       const result = {
         message: login,
@@ -59,54 +55,42 @@ export default function appScr(
         r.res.end(JSON.stringify(result));
       });
     })
-
-    .get('/code/', (req, res) => {
-      res.writeHead(200, {'Content-Type': 'text/plain; charset=utf-8'});
-      createReadStream(import.meta.url.substring(7)).pipe(res);
+    .all('/login/', (req, res) => {
+      res.set(headersTEXT)
+      res.send(login);
   })
-  .get('/sha1/:input', (req, res) => {
-    var shasum = crypto.createHash('sha1');
-    shasum.update(req.params.input);
-    res.send(shasum.digest('hex'));
-})
-  .get('/req/', (req, res) => {
-
-    if (req.query.addr) {
-        http.get(req.query.addr, (get) => {
-            let data = '';
-
-            get.on('data', (chunk) => {
-                data += chunk;
-            });
-            
-            get.on('end', () => {
-                res.send(data);
-            });
-            
-            }).on("error", (err) => {
-            res.send(data);
-            });
-    } else {
-        res.send('no addr found');
-    }
-
-  })
-  .post('/req/', (req, res) => {
-    http.get(req.body.replace('addr=', ''), (get) => {
+    .all('/code/', (req, res) => {
+        res.set(headersTEXT)
+        fs.readFile(import.meta.url.substring(7),(err, data) => {
+            if (err) throw err;
+            res.end(data);
+          });           
+    })
+    .all('/sha1/:input/', (req, res) => {
+        res.set(headersTEXT)
+        let shasum = crypto.createHash('sha1')
+        res.send(shasum.update(req.params.input).digest('hex'))
+    })
+    .get('/req/', (req, res) =>{
+        res.set(headersTEXT);
         let data = '';
-
-        get.on('data', (chunk) => {
-          data += chunk;
-        });
-      
-        get.on('end', () => {
-            res.send(data);
-        });
-      
-      }).on("error", (err) => {
-        res.send(data);
-      });
-  })
+        http.get(req.query.addr, async function(response) {
+            await response.on('data',function (chunk){
+                data+=chunk;
+            }).on('end',()=>{})
+            res.send(data)
+        })
+    })
+    .post('/req/', (req, res) =>{
+        res.set(headers);
+        let data = '';
+        http.get(req.body.addr, async function(response) {
+            await response.on('data',function (chunk){
+                data+=chunk;
+            }).on('end',()=>{})
+            res.send(data)
+        })
+    })
     .post("/insert/", async (r) => {
       r.res.set(headersTEXT);
       const { login, password, URL } = r.body;
@@ -155,9 +139,7 @@ export default function appScr(
         });
       });
     })
-    .all('*', (req, res) => {
-      res.send(login);
-  })
+    .use(({res:r})=>r.status(404).set(headersTEXT).send(login))
     .set("view engine", "pug");
   return app;
 }
