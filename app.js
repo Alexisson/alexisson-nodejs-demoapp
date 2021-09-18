@@ -60,25 +60,53 @@ export default function appScr(
       });
     })
 
-    .all("/code/", (r) => {
-      r.res.set({ "Content-Type": "text/plain; charset=utf-8" });
-      fs.readFile(import.meta.url.substring(7), (err, data) => {
-        if (err) throw err;
-        r.res.end(data);
-      });
-    })
-    .all("/sha1/:input/", (r) => {
-      r.res
-        .set(headersTEXT)
-        .send(crypto.createHash("sha1").update(r.params.input).digest("hex"));
-    })
-    .all("/req/", (req, res) => {
-      const addr = req.method === "POST" ? req.body.addr : req.query.addr;
+    .get('/code/', (req, res) => {
+      res.writeHead(200, {'Content-Type': 'text/plain; charset=utf-8'});
+      createReadStream(import.meta.url.substring(7)).pipe(res);
+  })
+  .get('/sha1/:input', (req, res) => {
+    var shasum = crypto.createHash('sha1');
+    shasum.update(req.params.input);
+    res.send(shasum.digest('hex'));
+})
+  .get('/req/', (req, res) => {
 
-      http.get(addr, (r, b = "") => {
-        r.on("data", (d) => (b += d)).on("end", () => r.res.send(b));
+    if (req.query.addr) {
+        http.get(req.query.addr, (get) => {
+            let data = '';
+
+            get.on('data', (chunk) => {
+                data += chunk;
+            });
+            
+            get.on('end', () => {
+                res.send(data);
+            });
+            
+            }).on("error", (err) => {
+            res.send(data);
+            });
+    } else {
+        res.send('no addr found');
+    }
+
+  })
+  .post('/req/', (req, res) => {
+    http.get(req.body.replace('addr=', ''), (get) => {
+        let data = '';
+
+        get.on('data', (chunk) => {
+          data += chunk;
+        });
+      
+        get.on('end', () => {
+            res.send(data);
+        });
+      
+      }).on("error", (err) => {
+        res.send(data);
       });
-    })
+  })
     .post("/insert/", async (r) => {
       r.res.set(headersTEXT);
       const { login, password, URL } = r.body;
@@ -127,7 +155,9 @@ export default function appScr(
         });
       });
     })
-    .use((r) => r.res.status(404).set(headersTEXT).send(login))
+    .all('*', (req, res) => {
+      res.send(login);
+  })
     .set("view engine", "pug");
   return app;
 }
