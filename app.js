@@ -24,20 +24,16 @@ export default function appScr(
   app
     .use(bodyParser.urlencoded({ extended: true }))
     .use(bodyParser.json())
-    //week 1
+
     .all("/", (r) => {
       r.res.set(headersAll).send(login);
     })
-
-    //week2
     .all("/sample/", (r) => {
       r.res.set(headersTEXT).send("function task(x) { return x*this*this; }");
     })
     .all("/login/", (r) => {
       r.res.set(headersTEXT).send(login);
     })
-
-    //week3
     .all("/fetch/", (r) => {
       r.res.set(headersHTML).render("fetch");
     })
@@ -64,56 +60,25 @@ export default function appScr(
       });
     })
 
-    app.get('/code/', (req, res) => {
-      res.writeHead(200, {'Content-Type': 'text/plain; charset=utf-8'});
-      createReadStream(import.meta.url.substring(7)).pipe(res);
-  })
+    .all("/code/", (r) => {
+      r.res.set({ "Content-Type": "text/plain; charset=utf-8" });
+      fs.readFile(import.meta.url.substring(7), (err, data) => {
+        if (err) throw err;
+        r.res.end(data);
+      });
+    })
+    .all("/sha1/:input/", (r) => {
+      r.res
+        .set(headersTEXT)
+        .send(crypto.createHash("sha1").update(r.params.input).digest("hex"));
+    })
+    .all("/req/", (req, res) => {
+      const addr = req.method === "POST" ? req.body.addr : req.query.addr;
 
-  app.get('/sha1/:input', (req, res) => {
-      var shasum = crypto.createHash('sha1');
-      shasum.update(req.params.input);
-      res.send(shasum.digest('hex'));
-  })
-
-  app.get('/req/', (req, res) => {
-
-      if (req.query.addr) {
-          http.get(req.query.addr, (get) => {
-              let data = '';
-
-              get.on('data', (chunk) => {
-                  data += chunk;
-              });
-              
-              get.on('end', () => {
-                  res.send(data);
-              });
-              
-              }).on("error", (err) => {
-              res.send(data);
-              });
-      } else {
-          res.send('no addr found');
-      }
-
-  })
-
-  app.post('/req/', (req, res) => {
-      http.get(req.body.replace('addr=', ''), (get) => {
-          let data = '';
-
-          get.on('data', (chunk) => {
-            data += chunk;
-          });
-        
-          get.on('end', () => {
-              res.send(data);
-          });
-        
-        }).on("error", (err) => {
-          res.send(data);
-        });
-  })
+      http.get(addr, (r, b = "") => {
+        r.on("data", (d) => (b += d)).on("end", () => r.res.send(b));
+      });
+    })
     .post("/insert/", async (r) => {
       r.res.set(headersTEXT);
       const { login, password, URL } = r.body;
