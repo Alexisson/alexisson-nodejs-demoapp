@@ -49,7 +49,7 @@ export default function appScr(
         );
     })
 
-    //week4
+
     .all("/result4/", (r) => {
       const result = {
         message: login,
