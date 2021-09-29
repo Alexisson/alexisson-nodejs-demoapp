@@ -56,23 +56,23 @@ export default function appScr(
       });
     })
     .all('/login/', (req, res) => {
-      res.set(headersTEXT)
-      res.send(login);
-  })
+      res.set(headers)
+      res.send('itmo307709');
+    })
     .all('/code/', (req, res) => {
-        res.set(headersTEXT)
+        res.set(headers)
         fs.readFile(import.meta.url.substring(7),(err, data) => {
             if (err) throw err;
             res.end(data);
           });           
     })
     .all('/sha1/:input/', (req, res) => {
-        res.set(headersTEXT)
+        res.set(headers)
         let shasum = crypto.createHash('sha1')
         res.send(shasum.update(req.params.input).digest('hex'))
     })
     .get('/req/', (req, res) =>{
-        res.set(headersTEXT);
+        res.set(headers);
         let data = '';
         http.get(req.query.addr, async function(response) {
             await response.on('data',function (chunk){
