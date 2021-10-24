@@ -20,7 +20,7 @@ export default function appScr(
   };
   const headersTEXT = { "Content-Type": "text/plain", ...CORS };
   const headersJSON = { "Content-Type": "application/json", ...CORS };
-  const headersCORS = {...CORS};
+  const headersCORS = { ...CORS };
 
   app
     .use(bodyParser.urlencoded({ extended: true }))
@@ -55,41 +55,45 @@ export default function appScr(
         r.res.end(JSON.stringify(result));
       });
     })
-    .all('/login/', (req, res) => {
-      res.set(headers)
-      res.send('itmo307709');
+    .all("/login/", (req, res) => {
+      res.set(headersTEXT);
+      res.send(login);
     })
-    .all('/code/', (req, res) => {
-        res.set(headers)
-        fs.readFile(import.meta.url.substring(7),(err, data) => {
-            if (err) throw err;
-            res.end(data);
-          });           
+    .all("/code/", (req, res) => {
+      res.set(headersT);
+      fs.readFile(import.meta.url.substring(7), (err, data) => {
+        if (err) throw err;
+        res.end(data);
+      });
     })
-    .all('/sha1/:input/', (req, res) => {
-        res.set(headers)
-        let shasum = crypto.createHash('sha1')
-        res.send(shasum.update(req.params.input).digest('hex'))
+    .all("/sha1/:input/", (req, res) => {
+      res.set(headers);
+      let shasum = crypto.createHash("sha1");
+      res.send(shasum.update(req.params.input).digest("hex"));
     })
-    .get('/req/', (req, res) =>{
-        res.set(headers);
-        let data = '';
-        http.get(req.query.addr, async function(response) {
-            await response.on('data',function (chunk){
-                data+=chunk;
-            }).on('end',()=>{})
-            res.send(data)
-        })
+    .get("/req/", (req, res) => {
+      res.set(headers);
+      let data = "";
+      http.get(req.query.addr, async function (response) {
+        await response
+          .on("data", function (chunk) {
+            data += chunk;
+          })
+          .on("end", () => {});
+        res.send(data);
+      });
     })
-    .post('/req/', (req, res) =>{
-        res.set(headers);
-        let data = '';
-        http.get(req.body.addr, async function(response) {
-            await response.on('data',function (chunk){
-                data+=chunk;
-            }).on('end',()=>{})
-            res.send(data)
-        })
+    .post("/req/", (req, res) => {
+      res.set(headers);
+      let data = "";
+      http.get(req.body.addr, async function (response) {
+        await response
+          .on("data", function (chunk) {
+            data += chunk;
+          })
+          .on("end", () => {});
+        res.send(data);
+      });
     })
     .post("/insert/", async (r) => {
       r.res.set(headersTEXT);
@@ -127,6 +131,33 @@ export default function appScr(
       browser.close();
       r.res.send(got);
     })
+    .all("/wordpress/", (r) => {
+      r.res.set(headersJSON);
+      r.res.send({
+        id: 1,
+        title: login,
+      });
+    })
+    .all("/wordpress/wp-json/wp/v2/posts/", (r) => {
+      r.res.set(headersJSON);
+      r.res.send([
+        {
+          id: 1,
+          title: {
+            rendered: login,
+          },
+        },
+      ]);
+    })
+    .all("/wordpress/wp-json/wp/v2/posts/:id", (r) => {
+      r.res.set(headersJSON);
+      r.res.send({
+        id: r.params.id,
+        title: {
+          rendered: login,
+        },
+      });
+    })
     .all("/render/", async (req, res) => {
       res.set(headersCORS);
       const { addr } = req.query;
@@ -139,7 +170,7 @@ export default function appScr(
         });
       });
     })
-    .use(({res:r})=>r.status(404).set(headersTEXT).send(login))
+    .use(({ res: r }) => r.status(404).set(headersTEXT).send(login))
     .set("view engine", "pug");
   return app;
 }
