@@ -11,7 +11,6 @@ export default function appScr(
   login
 ) {
   const app = express();
-  const path = import.meta.url.substring(7);
   const headersHTML = { "Content-Type": "text/html; charset=utf-8", ...CORS };
   const headersAll = {
     "Content-Type": "text/html; charset=utf-8",
@@ -21,6 +20,12 @@ export default function appScr(
   const headersTEXT = { "Content-Type": "text/plain", ...CORS };
   const headersJSON = { "Content-Type": "application/json", ...CORS };
   const headersCORS = { ...CORS };
+  const wp = {
+    id: 1,
+    title: {
+      rendered: login,
+    },
+  };
 
   app
     .use(bodyParser.urlencoded({ extended: true }))
@@ -51,28 +56,29 @@ export default function appScr(
 
       r.on("data", (data) => (body += data)).on("end", () => {
         result["x-body"] = body;
-        r.res.writeHead(200, { ...CORS, "Content-Type": "application/json" });
-        r.res.end(JSON.stringify(result));
+        r.res
+          .writeHead(200, { ...CORS, "Content-Type": "application/json" })
+          .end(JSON.stringify(result));
       });
     })
-    .all("/login/", (req, res) => {
-      res.set(headersTEXT);
-      res.send(login);
+    .all("/login/", (r) => {
+      r.res.set(headersTEXT).send(login);
     })
-    .all("/code/", (req, res) => {
-      res.set(headersT);
+    .all("/code/", (r) => {
+      r.res.set(headersTEXT);
       fs.readFile(import.meta.url.substring(7), (err, data) => {
         if (err) throw err;
-        res.end(data);
+        r.res.end(data);
       });
     })
-    .all("/sha1/:input/", (req, res) => {
-      res.set(headers);
+    .all("/sha1/:input/", (r) => {
       let shasum = crypto.createHash("sha1");
-      res.send(shasum.update(req.params.input).digest("hex"));
+      r.res
+        .set(headersTEXT)
+        .send(shasum.update(req.params.input).digest("hex"));
     })
-    .get("/req/", (req, res) => {
-      res.set(headers);
+    .get("/req/", (r) => {
+      r.res.set(headersTEXT);
       let data = "";
       http.get(req.query.addr, async function (response) {
         await response
@@ -80,11 +86,11 @@ export default function appScr(
             data += chunk;
           })
           .on("end", () => {});
-        res.send(data);
+        r.res.send(data);
       });
     })
-    .post("/req/", (req, res) => {
-      res.set(headers);
+    .post("/req/", (r) => {
+      r.res.set(headersTEXT);
       let data = "";
       http.get(req.body.addr, async function (response) {
         await response
@@ -92,7 +98,7 @@ export default function appScr(
             data += chunk;
           })
           .on("end", () => {});
-        res.send(data);
+        r.res.send(data);
       });
     })
     .post("/insert/", async (r) => {
@@ -132,37 +138,15 @@ export default function appScr(
       r.res.send(got);
     })
     .all("/wordpress/", (r) => {
-      r.res.set(headersJSON);
-      r.res.send({
-        id: 1,
-        title: login,
-      });
+      r.res.set(headersJSON).send(wp);
     })
     .all("/wordpress/wp-json/wp/v2/posts/", (r) => {
-      r.res.set(headersJSON);
-      r.res.send([
-        {
-          id: 1,
-          title: {
-            rendered: login,
-          },
-        },
-      ]);
-    })
-    .all("/wordpress/wp-json/wp/v2/posts/:id", (r) => {
-      r.res.set(headersJSON);
-      r.res.send({
-        id: r.params.id,
-        title: {
-          rendered: login,
-        },
-      });
+      r.res.set(headersJSON).send([wp]);
     })
     .all("/render/", async (req, res) => {
       res.set(headersCORS);
       const { addr } = req.query;
       const { random2, random3 } = req.body;
-
       http.get(addr, (r, b = "") => {
         r.on("data", (d) => (b += d)).on("end", () => {
           fs.writeFileSync("views/render.pug", b);
